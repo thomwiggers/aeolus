@@ -18,6 +18,7 @@ class ConnectionTest(unittest.TestCase):
     self.connection = Connection()
 
   def tearDown(self):
+    """Resets the mox stubs so we can build them again"""
     self.mox.UnsetStubs()
 
   def testConnectEasySuccess(self):
@@ -44,7 +45,31 @@ class ConnectionTest(unittest.TestCase):
     with self.assertRaisesRegexp(ConnectionException, "No.*host") as ce:
       self.connection.connect("nick","nonexistingserver")
     self.mox.VerifyAll()
-    
+
+  def testConnectionFailTimeout(self):
+    """
+    Tests failing to connect due to a server timeout
+    """
+
+    socket.create_connection(("timeouthost", 6667)
+        ).AndRaise(IOError(errno.ETIMEOUT, os.strerror(errno.ETIMEOUT)))
+    self.mox.ReplayAll()
+    with self.assertRaisesRegexp(ConnectionException, "timeout") as ce:
+      self.connection.connect("nick", "timeouthost")
+    self.mox.VerifyAll()
+
+  def testConnectionFailRefused(self):
+    """
+    Tests failing to connect because the server refuses it
+    """
+    socket.create_connection(("refusehost", 6667)
+      ).AndRefuse(IOError(errno.ECONNREFUSED, 
+        os.strerror(errno.ECONNREFUSED)))
+    self.mox.ReplayAll()
+    with self.assertRaisesRegexp(ConnectionException, "refused"):
+      self.connection.connect("nick", "refusehost")
+    self.mox.VerifyAll()
+
 
 if __name__ == "__main__":
   unittest.main()
