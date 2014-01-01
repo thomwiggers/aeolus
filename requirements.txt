@@ -1,0 +1,4 @@
+argparse==1.2.1
+irc==8.5.4
+six==1.4.1
+wsgiref==0.1.2
