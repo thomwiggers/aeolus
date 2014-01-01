@@ -80,3 +80,24 @@ class AeolusBotTest(unittest.TestCase):
     bot.reload_module("test", 'fiets')
     mymock.assert_called_once_with(bot)
     mock2.assert_called_once_with(bot)
+
+  def test_get_module_fail(self):
+    bot = AeolusBot()
+    with self.assertRaises(ModuleNotFoundError):
+      bot.get_module("fiets","fietsmodule")
+    bot.register_module("fiets", module.Module)
+    with self.assertRaises(ModuleNotFoundError):
+      bot.get_module("fiets","fietband")
+    with self.assertRaises(ModuleNotFoundError):
+      bot.get_module("fietsband", module.Module.__name__)
+
+  def test_defaults(self):
+    bot = AeolusBot()
+    self.assertNotEquals("fiets",bot.get_default_username())
+    self.assertNotEquals("auto",bot.get_default_realname())
+    bot.set_default_username("fiets")
+    self.assertEquals("fiets",bot.get_default_username())
+    bot.set_default_realname("auto")
+    self.assertEquals("auto",bot.get_default_realname())
+
+

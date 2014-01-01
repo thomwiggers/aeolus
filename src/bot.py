@@ -65,24 +65,29 @@ class AeolusBot(irc.client.IRC):
 
   def reload_module(self, server_name, module_name):
     "Reloads a module instance from a server"
-    try:
-      module = self._servers[server_name]['modules'][module_name]
-      if hasattr(module, 'reload') and callable(module.reload):
-        module.reload()
-      else:
-        if hasattr(module, 'destroy') and callable(module.destroy):
-          module.destroy()
-        self._servers[server_name]['modules'][module_name] = module.__class__(self)
-    except KeyError:
-      raise ModuleNotFoundError()
+    module = self.get_module(server_name, module_name)
+    if hasattr(module, 'reload') and callable(module.reload):
+      module.reload()
+    else:
+      if hasattr(module, 'destroy') and callable(module.destroy):
+        module.destroy()
+      self._servers[server_name]['modules'][module_name] = module.__class__(self)
 
   def set_default_username(self, username):
     "Set the default username"
     self._default_username = username
 
+  def get_default_username(self):
+    "Returns the default username"
+    return self._default_username
+
   def set_default_realname(self, realname):
     "Sets the default realname"
     self._default_realname = realname
+
+  def get_default_realname(self):
+    "Returns the default realname"
+    return self._default_realname
 
 class AeolusError(irc.client.IRCError):
   "An error occured in the Aeolus library"
@@ -95,11 +100,6 @@ class ModuleAlreadyRegisteredError(AeolusError):
 
 class ModuleNotFoundError(AeolusError):
   "Module Not Found"
-
-if __name__ == '__main__':
-  pass
-
-
 
 
 # vim: set ts=4 sw=2 tw=0 et :
